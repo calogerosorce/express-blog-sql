@@ -1,6 +1,8 @@
 const posts = require('../posts/posts')
 const { tag, posFil } = require('../helper/help')
 const connection = require('../database/connection')
+
+
 const index = (req, res) => {
 
     const sql = 'SELECT * FROM posts';
@@ -21,9 +23,27 @@ const index = (req, res) => {
 }
 
 const show = (req, res) => {
-    const postFilter = posFil(posts, res, req.params.id);
 
-    res.json(postFilter)
+    const id = Number(req.params.id)
+
+    const sql = 'SELECT * FROM posts WHERE id = ?';
+    const sqlTags = 'SELECT * FROM tags JOIN post_tag ON post_tag.tag_id = tags.id WHERE post_tag.post_id = ?'
+
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: true, message: err.message })
+        if (results.length === 0) return res.status(404).json({ error: true, message: 'Post not found' })
+
+        const post = results[0]
+
+        connection.query(sqlTags, [id], (errTags, resTags) => {
+            post.tag = resTags
+            res.json(post)
+        })
+    })
+
+    /*  const postFilter = posFil(posts, res, req.params.id);
+ 
+     res.json(postFilter)*/
 }
 
 const store = (req, res) => {
