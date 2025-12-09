@@ -73,11 +73,21 @@ const modify = (req, res) => {
 }
 
 const destroy = (req, res) => {
-    const postFilter = posFil(posts, res, req.params.id);
+
+    const id = Number(req.params.id)
+
+    const sql = 'DELETE FROM posts WHERE id = ?';
+
+    connection.query(sql, [id], (err, results) => {
+        if (err) return res.status(500).json({ error: true, message: err.message })
+
+        return res.sendStatus(204)
+    })
+    /* const postFilter = posFil(posts, res, req.params.id);
 
     posts.splice(posts.indexOf(postFilter), 1)
 
-    res.sendStatus(204)
+    res.sendStatus(204) */
 }
 
 module.exports = {
